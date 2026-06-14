@@ -48,10 +48,13 @@ while ($true) {
     # Czyszczenie ekranu przed pokazaniem menu
     Clear-Host
     
-    # Rysowanie profesjonalnego menu (zmieniono kolory na Red)
-    Write-Host "==========================================================" -ForegroundColor Red
-    Write-Host "            HYAROSCRIPT POWERSHELL INSTALLER              " -ForegroundColor Red
-    Write-Host "==========================================================" -ForegroundColor Red
+    # Rysowanie nowego, hakerskiego logo (ASCII Art)
+    Write-Host "   _   _ __   __  _    ____   ___  ____   ____ ____  ___ ____ _____ " -ForegroundColor Red
+    Write-Host "  | | | |\ \ / / / \  |  _ \ / _ \/ ___| / ___|  _ \|_ _|  _ \_   _|" -ForegroundColor Red
+    Write-Host "  | |_| | \ V / / _ \ | |_) | | | \___ \| |   | |_) || || |_) || |  " -ForegroundColor Red
+    Write-Host "  |  _  |  | | / ___ \|  _ <| |_| |___) | |___|  _ < | ||  __/ | |  " -ForegroundColor Red
+    Write-Host "  |_| |_|  |_|/_/   \_\_| \_\\___/|____/ \____|_| \_\___|_|    |_|  " -ForegroundColor Red
+    Write-Host "  |___________ P O W E R S H E L L   I N S T A L L E R ____________| " -ForegroundColor White
     Write-Host ""
     Write-Host "  Znaleziono folder Steam: $steamPath" -ForegroundColor DarkGray
     Write-Host ""
@@ -59,10 +62,10 @@ while ($true) {
     Write-Host "  [2] Odinstaluj pliki .DLL z folderu Steam" -ForegroundColor White
     Write-Host "  [3] Wyjdz" -ForegroundColor White
     Write-Host ""
-    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host " ================================================================== " -ForegroundColor Red
     Write-Host ""
     
-    # Zmieniona czesc - natychmiastowe lapanie klawisza
+    # Natychmiastowe lapanie klawisza
     Write-Host "  Wybierz opcje (1-3): " -NoNewline -ForegroundColor Yellow
     
     # Używamy funkcji systemowej do zlapania jednego klawisza bez czekania na ENTER
