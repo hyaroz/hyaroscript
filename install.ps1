@@ -48,10 +48,10 @@ while ($true) {
     # Czyszczenie ekranu przed pokazaniem menu
     Clear-Host
     
-    # Rysowanie profesjonalnego menu
-    Write-Host "==========================================================" -ForegroundColor Cyan
-    Write-Host "            HYAROSCRIPT POWERSHELL INSTALLER              " -ForegroundColor Cyan
-    Write-Host "==========================================================" -ForegroundColor Cyan
+    # Rysowanie profesjonalnego menu (zmieniono kolory na Red)
+    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host "            HYAROSCRIPT POWERSHELL INSTALLER              " -ForegroundColor Red
+    Write-Host "==========================================================" -ForegroundColor Red
     Write-Host ""
     Write-Host "  Znaleziono folder Steam: $steamPath" -ForegroundColor DarkGray
     Write-Host ""
@@ -59,10 +59,15 @@ while ($true) {
     Write-Host "  [2] Odinstaluj pliki .DLL z folderu Steam" -ForegroundColor White
     Write-Host "  [3] Wyjdz" -ForegroundColor White
     Write-Host ""
-    Write-Host "==========================================================" -ForegroundColor Cyan
+    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host ""
     
-    # Oczekiwanie na wpisanie cyfry przez uzytkownika
-    $wybor = Read-Host "Wybierz opcje (1-3)"
+    # Zmieniona czesc - natychmiastowe lapanie klawisza
+    Write-Host "  Wybierz opcje (1-3): " -NoNewline -ForegroundColor Yellow
+    
+    # Używamy funkcji systemowej do zlapania jednego klawisza bez czekania na ENTER
+    $klawisz = [System.Console]::ReadKey($true)
+    $wybor = $klawisz.KeyChar.ToString()
 
     # Mechanizm sprawdzajacy, co wybral uzytkownik
     switch ($wybor) {
@@ -130,7 +135,7 @@ while ($true) {
         
         # BLAD: Gdy ktos wpisze inna cyfre lub literę
         default {
-            Write-Host "`nBlad: Nieprawidlowy wybor! Wpisz tylko cyfre 1, 2 lub 3." -ForegroundColor Red
+            Write-Host "`nBlad: Nieprawidlowy wybor! Wcisnij tylko cyfre 1, 2 lub 3." -ForegroundColor Red
             # Dajemy 2 sekundy na przeczytanie bledu, po czym menu rysuje sie od nowa
             Start-Sleep -Seconds 2
         }
