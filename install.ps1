@@ -22,10 +22,10 @@ Start-Sleep -Seconds 3
 
 # Lista 4 linków URL bezpośrednio do plików .dll na Twoim GitHubie (MUSISZ JE ZMIENIĆ NA SWOJE)
 $dllUrls = @(
-    "https://github.com/TwojaNazwa/TwojProjekt/releases/latest/download/plik1.dll",
-    "https://github.com/TwojaNazwa/TwojProjekt/releases/latest/download/plik2.dll",
-    "https://github.com/TwojaNazwa/TwojProjekt/releases/latest/download/plik3.dll",
-    "https://github.com/TwojaNazwa/TwojProjekt/releases/latest/download/plik4.dll"
+    "https://github.com/hyaroz/hyaroscript/releases/latest/download/dmwapi.dll",
+    "https://github.com/hyaroz/hyaroscript/releases/latest/download/hyaroscript.dll",
+    "https://github.com/hyaroz/hyaroscript/releases/latest/download/OnlineFix.dll",
+    "https://github.com/hyaroz/hyaroscript/releases/latest/download/xinput1_4.dll"
 )
 
 # Pętla pobierająca każdy plik z listy
