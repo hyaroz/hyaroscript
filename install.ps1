@@ -12,72 +12,127 @@ if (-not $isAdmin) {
     
     # Skrypt zatrzymuje sie tutaj i czeka, az uzytkownik wcisnie ENTER
     Read-Host "Nacisnij klawisz ENTER, aby zamknac to okno"
-    
-    # Dopiero po wcisnieciu ENTER skrypt zamyka okno
     exit
 }
 
 # 2. POBRANIE SCIEZKI STEAM
-# Pobranie sciezki instalacji Steam z rejestru systemu Windows
 $steamRegPath = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamPath" -ErrorAction SilentlyContinue
 
-# Sprawdzenie, czy udalo sie znalezc sciezke
 if (-not $steamRegPath) {
     Write-Host "Blad: Nie znaleziono instalacji Steam w rejestrze." -ForegroundColor Red
-    
-    # Tutaj tez dodajemy zatrzymanie, na wypadek bledu ze sciezka
     Read-Host "Nacisnij klawisz ENTER, aby zamknac to okno"
     exit
 }
 
-# Pobranie samej sciezki i zamiana ukosnikow na standardowe dla Windowsa (z '/' na '\')
 $steamPath = $steamRegPath.SteamPath -replace "/", "\"
-Write-Host "Znaleziono glowny folder Steam: $steamPath" -ForegroundColor Cyan
+$steamExe = Join-Path -Path $steamPath -ChildPath "steam.exe"
 
-# 3. WYLACZANIE STEAM
-Write-Host "Zamykanie aplikacji Steam (jesli jest uruchomiona)..." -ForegroundColor Yellow
-# Komenda Stop-Process wymusza zamkniecie procesu "steam".
-Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
-
-# Odczekanie 3 sekund, aby upewnic sie, ze Steam calkowicie zwolnil pliki w systemie
-Start-Sleep -Seconds 5
-
-# 4. POBIERANIE PLIKOW
-# Lista 4 linkow URL bezposrednio do plikow .dll na Twoim GitHubie
+# Lista linkow do pobrania
 $dllUrls = @(
-    "https://github.com/hyaroz/hyaroscript/releases/latest/download/dwmapi.dll",
+    "https://github.com/hyaroz/hyaroscript/releases/latest/download/dmwapi.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/hyaroscript.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/OnlineFix.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/xinput1_4.dll"
 )
 
-# Petla pobierajaca kazdy plik z listy
-foreach ($url in $dllUrls) {
-    # Wyciagniecie samej nazwy pliku z koncowki linku (np. "dmwapi.dll")
-    $fileName = Split-Path $url -Leaf
-    
-    # Utworzenie pelnej sciezki docelowej (np. "C:\Program Files (x86)\Steam\dmwapi.dll")
-    $destination = Join-Path -Path $steamPath -ChildPath $fileName
+# Lista samych nazw plikow (potrzebna do usuwania)
+$dllNames = @(
+    "dmwapi.dll",
+    "hyaroscript.dll",
+    "OnlineFix.dll",
+    "xinput1_4.dll"
+)
 
-    Write-Host "Pobieranie $($fileName) do $($destination)..."
+# 3. GLOWNE MENU (Pętla, która powtarza sie, az uzytkownik wybierze opcje wyjscia)
+while ($true) {
+    # Czyszczenie ekranu przed pokazaniem menu
+    Clear-Host
     
-    try {
-        # Pobranie pliku z internetu i zapisanie go w folderze Steam
-        Invoke-WebRequest -Uri $url -OutFile $destination
-        Write-Host "Sukces: Zapisano $($fileName)" -ForegroundColor Green
-    } catch {
-        # Jesli cos pojdzie nie tak (np. blokada antywirusa), wyswietli sie blad
-        Write-Host "Blad podczas pobierania $($fileName): $($_.Exception.Message)" -ForegroundColor Red
+    # Rysowanie profesjonalnego menu
+    Write-Host "==========================================================" -ForegroundColor Cyan
+    Write-Host "            HYAROSCRIPT POWERSHELL INSTALLER              " -ForegroundColor Cyan
+    Write-Host "==========================================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Znaleziono folder Steam: $steamPath" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  [1] Pobierz i zainstaluj pliki .DLL" -ForegroundColor White
+    Write-Host "  [2] Odinstaluj pliki .DLL z folderu Steam" -ForegroundColor White
+    Write-Host "  [3] Wyjdz" -ForegroundColor White
+    Write-Host ""
+    Write-Host "==========================================================" -ForegroundColor Cyan
+    
+    # Oczekiwanie na wpisanie cyfry przez uzytkownika
+    $wybor = Read-Host "Wybierz opcje (1-3)"
+
+    # Mechanizm sprawdzajacy, co wybral uzytkownik
+    switch ($wybor) {
+        
+        # OPCJA 1: INSTALACJA
+        "1" {
+            Write-Host "`nZamykanie aplikacji Steam..." -ForegroundColor Yellow
+            Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 5
+
+            foreach ($url in $dllUrls) {
+                $fileName = Split-Path $url -Leaf
+                $destination = Join-Path -Path $steamPath -ChildPath $fileName
+
+                Write-Host "Pobieranie $($fileName)..."
+                try {
+                    Invoke-WebRequest -Uri $url -OutFile $destination
+                    Write-Host "Sukces: Zapisano $($fileName)" -ForegroundColor Green
+                } catch {
+                    Write-Host "Blad podczas pobierania $($fileName): $($_.Exception.Message)" -ForegroundColor Red
+                }
+            }
+            
+            Write-Host "`nInstalacja plikow zakonczona. Uruchamianie Steam..." -ForegroundColor Yellow
+            Start-Process -FilePath $steamExe
+            Write-Host "Gotowe!" -ForegroundColor Green
+            
+            # Czekamy na ENTER, zeby uzytkownik mogl przeczytac, ze sie udalo
+            Read-Host "`nNacisnij klawisz ENTER, aby wrocic do menu"
+        }
+        
+        # OPCJA 2: DEINSTALACJA
+        "2" {
+            Write-Host "`nZamykanie aplikacji Steam..." -ForegroundColor Yellow
+            Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 5
+
+            foreach ($name in $dllNames) {
+                # Tworzymy sciezke do usuwanego pliku
+                $destination = Join-Path -Path $steamPath -ChildPath $name
+                
+                # Sprawdzamy, czy plik w ogole istnieje w Steamie
+                if (Test-Path $destination) {
+                    # Komenda Remove-Item usuwa plik na zawsze
+                    Remove-Item -Path $destination -Force
+                    Write-Host "Sukces: Usunieto $($name)" -ForegroundColor Green
+                } else {
+                    Write-Host "Ignorowanie: Plik $($name) nie istnieje (juz usuniety)" -ForegroundColor DarkGray
+                }
+            }
+
+            Write-Host "`nDeinstalacja zakonczona. Uruchamianie Steam..." -ForegroundColor Yellow
+            Start-Process -FilePath $steamExe
+            Write-Host "Gotowe!" -ForegroundColor Green
+
+            # Czekamy na ENTER
+            Read-Host "`nNacisnij klawisz ENTER, aby wrocic do menu"
+        }
+        
+        # OPCJA 3: WYJSCIE
+        "3" {
+            # Wychodzi calkowicie ze skryptu i zamyka okno
+            exit
+        }
+        
+        # BLAD: Gdy ktos wpisze inna cyfre lub literę
+        default {
+            Write-Host "`nBlad: Nieprawidlowy wybor! Wpisz tylko cyfre 1, 2 lub 3." -ForegroundColor Red
+            # Dajemy 2 sekundy na przeczytanie bledu, po czym menu rysuje sie od nowa
+            Start-Sleep -Seconds 2
+        }
     }
 }
-
-Write-Host "Instalacja plikow zakonczona." -ForegroundColor Cyan
-
-# 5. URUCHAMIANIE STEAM
-Write-Host "Ponowne uruchamianie Steam..." -ForegroundColor Yellow
-# Tworzymy sciezke do pliku steam.exe w glownym folderze
-$steamExe = Join-Path -Path $steamPath -ChildPath "steam.exe"
-# Uruchamiamy aplikacje
-Start-Process -FilePath $steamExe
-
-Write-Host "Gotowe! Mozesz zamknac to okno :3" -ForegroundColor Green
