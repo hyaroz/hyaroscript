@@ -62,7 +62,6 @@ while ($true) {
     Write-Host "  [2] Odinstaluj pliki .DLL z folderu Steam" -ForegroundColor White
     Write-Host "  [3] Wyjdz" -ForegroundColor White
     Write-Host ""
-    Write-Host " ================================================================== " -ForegroundColor Red
     Write-Host ""
     
     # Natychmiastowe lapanie klawisza
