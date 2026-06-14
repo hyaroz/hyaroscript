@@ -29,7 +29,7 @@ $steamExe = Join-Path -Path $steamPath -ChildPath "steam.exe"
 
 # Lista linkow do pobrania
 $dllUrls = @(
-    "https://github.com/hyaroz/hyaroscript/releases/latest/download/dmwapi.dll",
+    "https://github.com/hyaroz/hyaroscript/releases/latest/download/dwmapi.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/hyaroscript.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/OnlineFix.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/xinput1_4.dll"
@@ -37,7 +37,7 @@ $dllUrls = @(
 
 # Lista samych nazw plikow (potrzebna do usuwania)
 $dllNames = @(
-    "dmwapi.dll",
+    "dwmapi.dll",
     "hyaroscript.dll",
     "OnlineFix.dll",
     "xinput1_4.dll"
