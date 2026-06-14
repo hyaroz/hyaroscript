@@ -9,7 +9,7 @@ if (-not $steamRegPath) {
 
 # Pobranie samej ścieżki i zamiana ukośników na standardowe dla Windowsa (z '/' na '\')
 $steamPath = $steamRegPath.SteamPath -replace "/", "\"
-Write-Host "Znaleziono główny folder Steam: $steamPath" -ForegroundColor Cyan
+Write-Host "Znaleziono glowny folder Steam: $steamPath" -ForegroundColor Cyan
 
 # WYŁĄCZANIE STEAM
 Write-Host "Zamykanie aplikacji Steam (jeśli jest uruchomiona)..." -ForegroundColor Yellow
@@ -44,7 +44,7 @@ foreach ($url in $dllUrls) {
         Write-Host "Sukces: Zapisano $fileName" -ForegroundColor Green
     } catch {
         # Jeśli coś pójdzie nie tak (np. brak uprawnień), wyświetli się błąd
-        Write-Host "Błąd podczas pobierania $fileName: $_" -ForegroundColor Red
+        Write-Host "Blad podczas pobierania $fileName: $_" -ForegroundColor Red
     }
 }
 
