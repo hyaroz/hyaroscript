@@ -5,7 +5,7 @@ $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 # Jesli skrypt odkryje, ze NIE jest administratorem (zmienna $isAdmin to falsz):
 if (-not $isAdmin) {
     Write-Host "============================================================================" -ForegroundColor Red
-    Write-Host "‎ ‎ ‎ ‎ ‎ BLAD: Komenda nie mogla sie zaladowac przez brak uprawnien." -ForegroundColor Red
+    Write-Host "‎ ‎ ‎ ‎ ‎ ‎ ‎‎BLAD: Komenda nie mogla sie zaladowac przez brak uprawnien." -ForegroundColor Red
     Write-Host "‎ ‎ ‎ ‎Wymagane sa uprawnienia administratorskie, aby edytowac pliki Steam." -ForegroundColor Red
     Write-Host "‎‎ Prosze uruchomic PowerShell jako Administrator i wkleic komende ponownie." -ForegroundColor Yellow
     Write-Host "============================================================================" -ForegroundColor Red
