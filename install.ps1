@@ -55,7 +55,7 @@ while ($true) {
     Write-Host ""
     Write-Host "  Znaleziono folder Steam: $steamPath" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "  [1] Pobierz i zainstaluj pliki .DLL" -ForegroundColor White
+    Write-Host "  [1] Pobierz i zainstaluj najnowsze pliki .DLL (v1.2)" -ForegroundColor White
     Write-Host "  [2] Odinstaluj pliki .DLL z folderu Steam" -ForegroundColor White
     Write-Host "  [3] Wyjdz" -ForegroundColor White
     Write-Host ""
