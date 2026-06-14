@@ -9,6 +9,11 @@ if (-not $isAdmin) {
     Write-Host "Wymagane sa uprawnienia administratorskie, aby edytowac pliki Steam." -ForegroundColor Red
     Write-Host "Prosze uruchomic PowerShell jako Administrator i wkleic komende ponownie." -ForegroundColor Yellow
     Write-Host "=======================================================" -ForegroundColor Red
+    
+    # Skrypt zatrzymuje sie tutaj i czeka, az uzytkownik wcisnie ENTER
+    Read-Host "Nacisnij klawisz ENTER, aby zamknac to okno"
+    
+    # Dopiero po wcisnieciu ENTER skrypt zamyka okno
     exit
 }
 
@@ -19,6 +24,9 @@ $steamRegPath = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "Steam
 # Sprawdzenie, czy udalo sie znalezc sciezke
 if (-not $steamRegPath) {
     Write-Host "Blad: Nie znaleziono instalacji Steam w rejestrze." -ForegroundColor Red
+    
+    # Tutaj tez dodajemy zatrzymanie, na wypadek bledu ze sciezka
+    Read-Host "Nacisnij klawisz ENTER, aby zamknac to okno"
     exit
 }
 
@@ -31,8 +39,8 @@ Write-Host "Zamykanie aplikacji Steam (jesli jest uruchomiona)..." -ForegroundCo
 # Komenda Stop-Process wymusza zamkniecie procesu "steam".
 Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
 
-# Odczekanie 5 sekund, aby upewnic sie, ze Steam calkowicie zwolnil pliki w systemie
-Start-Sleep -Seconds 5
+# Odczekanie 3 sekund, aby upewnic sie, ze Steam calkowicie zwolnil pliki w systemie
+Start-Sleep -Seconds 3
 
 # 4. POBIERANIE PLIKOW
 # Lista 4 linkow URL bezposrednio do plikow .dll na Twoim GitHubie
