@@ -72,4 +72,4 @@ $steamExe = Join-Path -Path $steamPath -ChildPath "steam.exe"
 # Uruchamiamy aplikacje
 Start-Process -FilePath $steamExe
 
-Write-Host "Gotowe! Mozesz zamknac to okno." -ForegroundColor Green
+Write-Host "Gotowe! Mozesz zamknac to okno :3" -ForegroundColor Green
