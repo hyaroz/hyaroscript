@@ -1,26 +1,26 @@
-# Pobranie ścieżki instalacji Steam z rejestru systemu Windows
+# Pobranie sciezki instalacji Steam z rejestru systemu Windows
 $steamRegPath = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamPath" -ErrorAction SilentlyContinue
 
-# Sprawdzenie, czy udało się znaleźć ścieżkę
+# Sprawdzenie, czy udalo sie znalezc sciezke
 if (-not $steamRegPath) {
-    Write-Host "Błąd: Nie znaleziono instalacji Steam w rejestrze." -ForegroundColor Red
+    Write-Host "Blad: Nie znaleziono instalacji Steam w rejestrze." -ForegroundColor Red
     exit
 }
 
-# Pobranie samej ścieżki i zamiana ukośników na standardowe dla Windowsa (z '/' na '\')
+# Pobranie samej sciezki i zamiana ukosnikow na standardowe dla Windowsa (z '/' na '\')
 $steamPath = $steamRegPath.SteamPath -replace "/", "\"
 Write-Host "Znaleziono glowny folder Steam: $steamPath" -ForegroundColor Cyan
 
-# WYŁĄCZANIE STEAM
-Write-Host "Zamykanie aplikacji Steam (jeśli jest uruchomiona)..." -ForegroundColor Yellow
-# Komenda Stop-Process wymusza zamknięcie procesu "steam".
-# ErrorAction SilentlyContinue sprawia, że jeśli Steam był już wyłączony, skrypt nie wyrzuci błędu.
+# WYLACZANIE STEAM
+Write-Host "Zamykanie aplikacji Steam (jesli jest uruchomiona)..." -ForegroundColor Yellow
+# Komenda Stop-Process wymusza zamkniecie procesu "steam".
+# ErrorAction SilentlyContinue sprawia, ze jesli Steam byl juz wylaczony, skrypt nie wyrzuci bledu.
 Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
 
-# Odczekanie 3 sekund, aby upewnić się, że Steam całkowicie zwolnił pliki w systemie
+# Odczekanie 3 sekund, aby upewnic sie, ze Steam calkowicie zwolnil pliki w systemie
 Start-Sleep -Seconds 3
 
-# Lista 4 linków URL bezpośrednio do plików .dll na Twoim GitHubie (MUSISZ JE ZMIENIĆ NA SWOJE)
+# Lista 4 linkow URL bezposrednio do plikow .dll na Twoim GitHubie
 $dllUrls = @(
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/dmwapi.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/hyaroscript.dll",
@@ -28,33 +28,33 @@ $dllUrls = @(
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/xinput1_4.dll"
 )
 
-# Pętla pobierająca każdy plik z listy
+# Petla pobierajaca kazdy plik z listy
 foreach ($url in $dllUrls) {
-    # Wyciągnięcie samej nazwy pliku z końcówki linku (np. "plik1.dll")
+    # Wyciagniecie samej nazwy pliku z koncowki linku (np. "plik1.dll")
     $fileName = Split-Path $url -Leaf
     
-    # Utworzenie pełnej ścieżki docelowej (np. "C:\Program Files (x86)\Steam\plik1.dll")
+    # Utworzenie pelnej sciezki docelowej (np. "C:\Program Files (x86)\Steam\plik1.dll")
     $destination = Join-Path -Path $steamPath -ChildPath $fileName
 
-    Write-Host "Pobieranie $fileName do $destination..."
+    Write-Host "Pobieranie $($fileName) do $($destination)..."
     
     try {
         # Pobranie pliku z internetu i zapisanie go w folderze Steam
         Invoke-WebRequest -Uri $url -OutFile $destination
-        Write-Host "Sukces: Zapisano $fileName" -ForegroundColor Green
+        Write-Host "Sukces: Zapisano $($fileName)" -ForegroundColor Green
     } catch {
-        # Jeśli coś pójdzie nie tak (np. brak uprawnień), wyświetli się błąd
-        Write-Host "Blad podczas pobierania $fileName: $_" -ForegroundColor Red
+        # Jesli cos pojdzie nie tak (np. brak uprawnien), wyswietli sie blad
+        Write-Host "Blad podczas pobierania $($fileName): $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 
-Write-Host "Instalacja plików zakończona." -ForegroundColor Cyan
+Write-Host "Instalacja plikow zakonczona." -ForegroundColor Cyan
 
 # URUCHAMIANIE STEAM
 Write-Host "Ponowne uruchamianie Steam..." -ForegroundColor Yellow
-# Tworzymy ścieżkę do pliku steam.exe w głównym folderze
+# Tworzymy sciezke do pliku steam.exe w glownym folderze
 $steamExe = Join-Path -Path $steamPath -ChildPath "steam.exe"
-# Uruchamiamy aplikację
+# Uruchamiamy aplikacje
 Start-Process -FilePath $steamExe
 
-Write-Host "Gotowe! Możesz zamknąć to okno." -ForegroundColor Green
+Write-Host "Gotowe! Mozesz zamknac to okno." -ForegroundColor Green
