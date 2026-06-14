@@ -40,12 +40,12 @@ Write-Host "Zamykanie aplikacji Steam (jesli jest uruchomiona)..." -ForegroundCo
 Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
 
 # Odczekanie 3 sekund, aby upewnic sie, ze Steam calkowicie zwolnil pliki w systemie
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 5
 
 # 4. POBIERANIE PLIKOW
 # Lista 4 linkow URL bezposrednio do plikow .dll na Twoim GitHubie
 $dllUrls = @(
-    "https://github.com/hyaroz/hyaroscript/releases/latest/download/dmwapi.dll",
+    "https://github.com/hyaroz/hyaroscript/releases/latest/download/dwmapi.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/hyaroscript.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/OnlineFix.dll",
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/xinput1_4.dll"
