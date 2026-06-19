@@ -5,8 +5,8 @@ $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 # If the script detects it is NOT running as administrator ($isAdmin is false):
 if (-not $isAdmin) {
     Write-Host "============================================================================" -ForegroundColor Red
-    Write-Host "        ERROR: The command could not be loaded due to lack of privileges.   " -ForegroundColor Red
-    Write-Host "         Administrator privileges are required to edit Steam files.         " -ForegroundColor Red
+    Write-Host "        ERROR: The command could not be loaded due to lack of permission.   " -ForegroundColor Red
+    Write-Host "         Administrator permission are required to edit Steam files.         " -ForegroundColor Red
     Write-Host "      Please run PowerShell as Administrator and paste the command again.   " -ForegroundColor Yellow
     Write-Host "============================================================================" -ForegroundColor Red
     
