@@ -131,7 +131,7 @@ while ($true) {
             # CLEAR SCREEN FOR WARNING
             Clear-Host
             
-            Write-Host "=============== UNINSTALLATION WARNING ===============" -ForegroundColor Yellow
+            Write-Host "======================== UNINSTALLATION WARNING =========================" -ForegroundColor Yellow
             Write-Host "Please read the following information carefully:`n" -ForegroundColor White
             
             Write-Host "Proceeding with this uninstallation will:" -ForegroundColor White
@@ -139,7 +139,7 @@ while ($true) {
             Write-Host "2. Permanently delete specific files from your Steam directory:" -ForegroundColor Gray
             Write-Host "   (dwmapi.dll, hyaroscript.dll, OnlineFix.dll, xinput1_4.dll)`n" -ForegroundColor Gray
             
-            Write-Host "WARNING: You will lose access to all your buyed games from Hyaro's Shop" -ForegroundColor Red
+            Write-Host "WARNING: You will lose access to all your buyed games from Hyaro's Shop`n" -ForegroundColor Red
             
             Write-Host "Are you sure you want to completely remove these files? [Y] Yes / [N] No: " -NoNewline -ForegroundColor Yellow
             
