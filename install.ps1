@@ -78,7 +78,7 @@ while ($true) {
             # CLEAR SCREEN FOR WARNING
             Clear-Host
             
-            Write-Host "================ INSTALLATION WARNING ================" -ForegroundColor Yellow
+            Write-Host "=================== INSTALLATION INFO ===================" -ForegroundColor Yellow
             Write-Host "Please read the following information carefully:`n" -ForegroundColor White
             
             Write-Host "Proceeding with this installation will:" -ForegroundColor White
