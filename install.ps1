@@ -84,7 +84,7 @@ while ($true) {
             Write-Host "Proceeding with this installation will:" -ForegroundColor White
             Write-Host "1. Forcefully close your Steam application." -ForegroundColor Gray
             Write-Host "2. Download the required .DLL files from the server." -ForegroundColor Gray
-            Write-Host "3. Install them directly into your main Steam directory.`n" -ForegroundColor Gray
+            Write-Host "3. Install them directly into your main Steam directory." -ForegroundColor Gray
             Write-Host "4. Automatically start Steam application.`n" -ForegroundColor Gray
             
             Write-Host "Do you wish to proceed? [Y] Yes / [N] No: " -NoNewline -ForegroundColor Yellow
