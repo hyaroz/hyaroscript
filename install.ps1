@@ -230,7 +230,7 @@ while ($true) {
                 else {
                     # Wyrysowanie pięknej ramki ZANIM cokolwiek zacznie się pobierać lub wyłączać
                     Write-Host "=========================================================" -ForegroundColor Red
-                    Write-Host "             S Y N C H R O N I Z I N G   F I L E S       " -ForegroundColor White
+                    Write-Host "          S Y N C H R O N I Z I N G   F I L E S          " -ForegroundColor White
                     Write-Host "=========================================================" -ForegroundColor Red
                     Write-Host ""
 
