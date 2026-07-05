@@ -72,11 +72,12 @@ function Download-WithProgressBar {
                     $filledBlocks = [math]::Floor($percent / 5) 
                     $emptyBlocks = 20 - $filledBlocks
                     
-                    $bar = ("█" * $filledBlocks) + ("░" * $emptyBlocks)
+                    # Changed from Unicode blocks to standard ASCII symbols
+                    $bar = ("#" * $filledBlocks) + ("-" * $emptyBlocks)
                     $formattedPercent = $percent.ToString().PadLeft(3)
                     
                     # `r returns carriage to the beginning of the line to overwrite text
-                    Write-Host "`r  [$bar] $formattedPercent% " -NoNewline -ForegroundColor Cyan
+                    Write-Host "`r  [$bar] $formattedPercent% " -NoNewline -ForegroundColor White
                 }
             }
         } while ($bytesRead -gt 0)
@@ -250,7 +251,7 @@ while ($true) {
                     # Wywołanie funkcji zamykającej Steama
                     Stop-SteamSmart
 
-                    Write-Host "`n================== SYNCHRONIZING FILES ==================" -ForegroundColor Cyan
+                    Write-Host "`n================== SYNCHRONIZING FILES ==================" -ForegroundColor Red
                     
                     # Pobieramy TYLKO te pliki, które znalazły się na liście kolejkowej
                     foreach ($item in $downloadQueue) {
