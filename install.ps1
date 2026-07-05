@@ -181,8 +181,8 @@ while ($true) {
         "1" {
             Clear-Host
             
-            Write-Host " =================== INSTALLATION INFO ===================" -ForegroundColor Yellow
-            Write-Host "    Please read the following information carefully:`n" -ForegroundColor White
+            Write-Host "=================== INSTALLATION INFO ===================" -ForegroundColor Yellow
+            Write-Host "Please read the following information carefully:`n" -ForegroundColor White
             
             Write-Host "Proceeding with this installation will:" -ForegroundColor White
             Write-Host "1. Forcefully close your Steam application." -ForegroundColor Gray
@@ -268,8 +268,8 @@ while ($true) {
         "2" {
             Clear-Host
             
-            Write-Host " ======================== UNINSTALLATION WARNING =========================" -ForegroundColor Yellow
-            Write-Host " Please read the following information carefully:`n" -ForegroundColor White
+            Write-Host "======================== UNINSTALLATION WARNING =========================" -ForegroundColor Yellow
+            Write-Host "Please read the following information carefully:`n" -ForegroundColor White
             
             Write-Host "Proceeding with this uninstallation will:" -ForegroundColor White
             Write-Host "1. Forcefully close your Steam application." -ForegroundColor Gray
@@ -288,9 +288,9 @@ while ($true) {
                 Clear-Host
                 
                 # Ramka dla deinstalacji (dla spójności)
-                Write-Host " =========================================================" -ForegroundColor Red
-                Write-Host "             U N I N S T A L L I N G   F I L E S         " -ForegroundColor White
-                Write-Host " =========================================================" -ForegroundColor Red
+                Write-Host " ========================================================" -ForegroundColor Red
+                Write-Host "            U N I N S T A L L I N G   F I L E S          " -ForegroundColor White
+                Write-Host " ========================================================" -ForegroundColor Red
                 Write-Host ""
                 
                 Stop-SteamSmart
