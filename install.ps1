@@ -139,7 +139,7 @@ while ($true) {
                     Write-Host "`n [!] You already have the latest v1.2 version installed!" -ForegroundColor Yellow
                     Write-Host " [!] No files need to be downloaded or updated.`n" -ForegroundColor DarkGray
                     
-                    Read-Host "  Press the ENTER key to return to the menu"
+                    Read-Host " Press the ENTER key to return to the menu"
                 } 
                 # If files are missing or hashes don't match, proceed with install
                 else {
