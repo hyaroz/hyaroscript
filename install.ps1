@@ -6,11 +6,11 @@
 
 # FUNCTION 1: Intelligent Steam shutdown (Smart Kill)
 function Stop-SteamSmart {
-    Write-Host "`nChecking Steam process..." -ForegroundColor Yellow
+    Write-Host "  [*] Checking Steam process..." -ForegroundColor DarkGray
     $steamProcess = Get-Process -Name "steam" -ErrorAction SilentlyContinue
     
     if ($steamProcess) {
-        Write-Host "Closing Steam application..." -ForegroundColor Yellow
+        Write-Host "  [*] Closing Steam application..." -ForegroundColor DarkGray
         Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
         
         $timeout = 15
@@ -23,10 +23,8 @@ function Stop-SteamSmart {
         }
         
         if ($timer -ge $timeout) {
-            Write-Host "Warning: Steam took too long to close, proceeding anyway..." -ForegroundColor DarkGray
+            Write-Host "  [!] Warning: Steam took too long to close, proceeding anyway..." -ForegroundColor Yellow
         }
-    } else {
-        Write-Host "Steam is not running. Proceeding instantly..." -ForegroundColor DarkGray
     }
     
     # Small pause to release file locks in Windows
@@ -71,15 +69,15 @@ function Download-WithProgress {
                     $formattedPercent = $percent.ToString().PadLeft(3)
                     
                     # `r returns carriage to the beginning of the line to overwrite text
-                    Write-Host "`r  Downloading... $formattedPercent% (File Size: $totalMB MB) " -NoNewline -ForegroundColor White
+                    Write-Host "`r    Downloading... $formattedPercent% (File Size: $totalMB MB) " -NoNewline -ForegroundColor White
                 }
             }
         } while ($bytesRead -gt 0)
         
-        Write-Host "`n  Success: Saved $($FileName)" -ForegroundColor Green
+        Write-Host "`n    [+] Success: Saved $($FileName)`n" -ForegroundColor Green
     }
     catch {
-        Write-Host "`n  Error during download $($FileName): $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "`n    [-] Error during download $($FileName): $($_.Exception.Message)`n" -ForegroundColor Red
     }
     finally {
         # Release files so they can be used
@@ -181,7 +179,6 @@ while ($true) {
         
         # OPTION 1: INSTALLATION
         "1" {
-            # CLEAR SCREEN FOR WARNING FIRST
             Clear-Host
             
             Write-Host "=================== INSTALLATION INFO ===================" -ForegroundColor Yellow
@@ -195,86 +192,72 @@ while ($true) {
             
             Write-Host "Do you wish to proceed? [Y] Yes / [N] No: " -NoNewline -ForegroundColor Yellow
             
-            # Catch Y/N key
             $confirmKey = [System.Console]::ReadKey($true)
             $confirm = $confirmKey.KeyChar.ToString().ToUpper()
 
-            # If they pressed Y, THEN verify hashes and start installation
             if ($confirm -eq "Y") {
                 
-                # Wyczyść ekran natychmiast po zatwierdzeniu klawiszem Y
                 Clear-Host
                 
-                # --- NEW SMART SHA256 VERIFICATION & DOWNLOAD QUEUE ---
-                # Tworzymy pustą listę (kolejkę), do której dodamy tylko te pliki, które wymagają pobrania
                 $downloadQueue = @()
                 
-                # Skanujemy każdy z 4 linków
                 foreach ($url in $dllUrls) {
-                    # Wyciągamy samą nazwę pliku z linku (np. "dwmapi.dll")
                     $name = Split-Path $url -Leaf
                     $destination = Join-Path -Path $steamPath -ChildPath $name
                     $expectedHash = $dllHashes[$name]
 
-                    # Warunek 1: Sprawdzamy, czy pliku w ogóle brakuje
                     if (-not (Test-Path -Path $destination)) {
-                        # Dodajemy plik do kolejki pobierania z przypisanym powodem: "Missing"
                         $downloadQueue += [PSCustomObject]@{ Name = $name; Url = $url; Reason = "Missing" }
                     } 
-                    # Warunek 2: Jeśli plik istnieje, sprawdzamy jego hash
                     else {
                         $currentHash = (Get-FileHash -Path $destination -Algorithm SHA256).Hash
-                        # Jeśli hash się nie zgadza...
                         if ($currentHash -ne $expectedHash) {
-                            # Dodajemy plik do kolejki pobierania z przypisanym powodem: "Mismatch"
                             $downloadQueue += [PSCustomObject]@{ Name = $name; Url = $url; Reason = "Mismatch" }
                         }
                     }
                 }
 
-                # Jeśli kolejka pobierania jest całkowicie pusta (count = 0), oznacza to, że wszystkie 4 pliki były w wersji 1.2
                 if ($downloadQueue.Count -eq 0) {
                     Clear-Host
                     Write-Host "=========================================================" -ForegroundColor Red
                     Write-Host "                 V E R S I O N   C H E C K               " -ForegroundColor White
                     Write-Host "=========================================================" -ForegroundColor Red
-                    Write-Host "`n [!] You already have the latest v1.2 version installed!" -ForegroundColor Yellow
-                    Write-Host " [!] No files need to be downloaded or updated.`n" -ForegroundColor DarkGray
+                    Write-Host "`n  [!] You already have the latest v1.2 version installed!" -ForegroundColor Yellow
+                    Write-Host "  [*] No files need to be downloaded or updated.`n" -ForegroundColor DarkGray
                     
-                    Read-Host " Press the ENTER key to return to the menu"
+                    Read-Host "  Press the ENTER key to return to the menu"
                 } 
-                # Jeśli jednak jakikolwiek plik wymaga pobrania (kolejka > 0)
                 else {
-                    # Wywołanie funkcji zamykającej Steama
+                    # Wyrysowanie pięknej ramki ZANIM cokolwiek zacznie się pobierać lub wyłączać
+                    Write-Host "=========================================================" -ForegroundColor Red
+                    Write-Host "             S Y N C H R O N I Z I N G   F I L E S       " -ForegroundColor White
+                    Write-Host "=========================================================" -ForegroundColor Red
+                    Write-Host ""
+
+                    # Funkcja zamykania odpala się teraz pod ramką
                     Stop-SteamSmart
 
-                    Write-Host "`n================== SYNCHRONIZING FILES ==================" -ForegroundColor Red
-                    
-                    # Pobieramy TYLKO te pliki, które znalazły się na liście kolejkowej
                     foreach ($item in $downloadQueue) {
-                        
-                        # Sprawdzamy powód dodania do listy i drukujemy dedykowaną wiadomość przed pobieraniem
                         if ($item.Reason -eq "Missing") {
-                            Write-Host "`n[!] Missing file detected: $($item.Name)" -ForegroundColor DarkGray
+                            Write-Host "  [!] Missing file detected: $($item.Name)" -ForegroundColor Yellow
                         } 
                         elseif ($item.Reason -eq "Mismatch") {
-                            Write-Host "`n[!] Version mismatch detected for file: $($item.Name)" -ForegroundColor DarkGray
+                            Write-Host "  [!] Version mismatch detected: $($item.Name)" -ForegroundColor Yellow
                         }
                         
                         $destination = Join-Path -Path $steamPath -ChildPath $item.Name
-
-                        # Wywołanie funkcji pobierającej
                         Download-WithProgress -Url $item.Url -Destination $destination -FileName $item.Name
                     }
                     
-                    Write-Host "`nInstallation of required files completed. Starting Steam..." -ForegroundColor Yellow
+                    Write-Host "  [*] Installation of required files completed." -ForegroundColor DarkGray
+                    Write-Host "  [*] Starting Steam..." -ForegroundColor DarkGray
                     Start-Process -FilePath $steamExe
-                    Write-Host "Files successfully updated to version v1.2!" -ForegroundColor Green
                     
-                    Read-Host "`nPress the ENTER key to return to the menu"
+                    Write-Host "`n  [+] Files successfully updated to version v1.2!" -ForegroundColor Green
+                    
+                    Read-Host "`n  Press the ENTER key to return to the menu"
                 }
             } 
-            # If they pressed N (or any other key) at the prompt, cancel
             else {
                 Write-Host "`n`nOperation canceled. Returning to main menu..." -ForegroundColor DarkGray
                 Start-Sleep -Seconds 2
@@ -283,7 +266,6 @@ while ($true) {
         
         # OPTION 2: UNINSTALLATION
         "2" {
-            # CLEAR SCREEN FOR WARNING
             Clear-Host
             
             Write-Host "======================== UNINSTALLATION WARNING =========================" -ForegroundColor Yellow
@@ -298,17 +280,19 @@ while ($true) {
             
             Write-Host "Are you sure you want to completely remove these files? [Y] Yes / [N] No: " -NoNewline -ForegroundColor Yellow
             
-            # Catch Y/N key
             $confirmKey = [System.Console]::ReadKey($true)
             $confirm = $confirmKey.KeyChar.ToString().ToUpper()
 
-            # If they pressed Y, start uninstallation
             if ($confirm -eq "Y") {
                 
-                # Wyczyść ekran natychmiast po zatwierdzeniu klawiszem Y
                 Clear-Host
                 
-                # Call the Smart Kill function here as well
+                # Ramka dla deinstalacji (dla spójności)
+                Write-Host "=========================================================" -ForegroundColor Red
+                Write-Host "             U N I N S T A L L I N G   F I L E S         " -ForegroundColor White
+                Write-Host "=========================================================" -ForegroundColor Red
+                Write-Host ""
+                
                 Stop-SteamSmart
 
                 foreach ($name in $dllNames) {
@@ -316,19 +300,20 @@ while ($true) {
                     
                     if (Test-Path $destination) {
                         Remove-Item -Path $destination -Force
-                        Write-Host "Success: Deleted $($name)" -ForegroundColor Green
+                        Write-Host "  [+] Success: Deleted $($name)" -ForegroundColor Green
                     } else {
-                        Write-Host "Ignoring: File $($name) does not exist (already deleted)" -ForegroundColor DarkGray
+                        Write-Host "  [-] Ignoring: $($name) does not exist" -ForegroundColor DarkGray
                     }
                 }
 
-                Write-Host "`nUninstallation completed. Starting Steam..." -ForegroundColor Yellow
+                Write-Host "`n  [*] Uninstallation completed." -ForegroundColor DarkGray
+                Write-Host "  [*] Starting Steam..." -ForegroundColor DarkGray
                 Start-Process -FilePath $steamExe
-                Write-Host "Done!" -ForegroundColor Green
 
-                Read-Host "`nPress the ENTER key to return to the menu"
+                Write-Host "`n  [+] Done!" -ForegroundColor Green
+
+                Read-Host "`n  Press the ENTER key to return to the menu"
             } 
-            # If they pressed N (or any other key), cancel
             else {
                 Write-Host "`n`nOperation canceled. Returning to main menu..." -ForegroundColor DarkGray
                 Start-Sleep -Seconds 2
@@ -337,11 +322,10 @@ while ($true) {
         
         # OPTION 3: EXIT
         "3" {
-            # Exits the script completely and closes the window
             exit
         }
         
-        # ERROR: When someone types a different number or letter
+        # ERROR:
         default {
             Write-Host "`nError: Invalid choice! Press only the number 1, 2, or 3." -ForegroundColor Red
             Start-Sleep -Seconds 2
