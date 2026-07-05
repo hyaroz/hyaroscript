@@ -1,5 +1,5 @@
 # ============================================================================
-# 0. SETUP AND FUNCTIONS (Smart Kill & ASCII Progress Bar)
+# 0. SETUP AND FUNCTIONS (Smart Kill & Progress Info)
 # ============================================================================
 # Enforce TLS 1.2 to ensure downloads from GitHub work on all Windows versions
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -33,8 +33,8 @@ function Stop-SteamSmart {
     Start-Sleep -Seconds 1
 }
 
-# FUNCTION 2: File download with ASCII Progress Bar
-function Download-WithProgressBar {
+# FUNCTION 2: File download with Percentage and File Size
+function Download-WithProgress {
     param (
         [string]$Url,
         [string]$Destination,
@@ -56,9 +56,10 @@ function Download-WithProgressBar {
         $bytesRead = 0
         $totalDownloaded = 0
         
-        Write-Host "  Downloading..." -ForegroundColor White
+        # Calculate file size in Megabytes and round to 2 decimal places
+        $totalMB = [math]::Round($totalBytes / 1MB, 2)
         
-        # Loop for reading stream chunks and drawing the bar
+        # Loop for reading stream chunks and drawing the text
         do {
             $bytesRead = $responseStream.Read($buffer, 0, $buffer.Length)
             if ($bytesRead -gt 0) {
@@ -67,17 +68,10 @@ function Download-WithProgressBar {
                 
                 if ($totalBytes -gt 0) {
                     $percent = [math]::Floor(($totalDownloaded / $totalBytes) * 100)
-                    
-                    # 20 blocks in total for the progress bar
-                    $filledBlocks = [math]::Floor($percent / 5) 
-                    $emptyBlocks = 20 - $filledBlocks
-                    
-                    # Changed from Unicode blocks to standard ASCII symbols
-                    $bar = ("#" * $filledBlocks) + ("-" * $emptyBlocks)
                     $formattedPercent = $percent.ToString().PadLeft(3)
                     
                     # `r returns carriage to the beginning of the line to overwrite text
-                    Write-Host "`r  [$bar] $formattedPercent% " -NoNewline -ForegroundColor White
+                    Write-Host "`r  Downloading... $formattedPercent% (File Size: $totalMB MB) " -NoNewline -ForegroundColor White
                 }
             }
         } while ($bytesRead -gt 0)
@@ -256,18 +250,18 @@ while ($true) {
                     # Pobieramy TYLKO te pliki, które znalazły się na liście kolejkowej
                     foreach ($item in $downloadQueue) {
                         
-                        # Sprawdzamy powód dodania do listy i drukujemy dedykowaną wiadomość przed paskiem pobierania
+                        # Sprawdzamy powód dodania do listy i drukujemy dedykowaną wiadomość przed pobieraniem
                         if ($item.Reason -eq "Missing") {
-                            Write-Host "`n[!] Missing file detected: $($item.Name)" -ForegroundColor Yellow
+                            Write-Host "`n[!] Missing file detected: $($item.Name)" -ForegroundColor DarkGray
                         } 
                         elseif ($item.Reason -eq "Mismatch") {
-                            Write-Host "`n[!] Version mismatch detected for file: $($item.Name)" -ForegroundColor Yellow
+                            Write-Host "`n[!] Version mismatch detected for file: $($item.Name)" -ForegroundColor DarkGray
                         }
                         
                         $destination = Join-Path -Path $steamPath -ChildPath $item.Name
 
-                        # Wywołanie funkcji pobierającej z animowanym paskiem
-                        Download-WithProgressBar -Url $item.Url -Destination $destination -FileName $item.Name
+                        # Wywołanie funkcji pobierającej
+                        Download-WithProgress -Url $item.Url -Destination $destination -FileName $item.Name
                     }
                     
                     Write-Host "`nInstallation of required files completed. Starting Steam..." -ForegroundColor Yellow
