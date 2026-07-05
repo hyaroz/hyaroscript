@@ -134,10 +134,10 @@ while ($true) {
                 if ($allUpdated -eq $true) {
                     Clear-Host
                     Write-Host "=========================================================" -ForegroundColor Red
-                    Write-Host "                   V E R I F I C A T I O N               " -ForegroundColor White
+                    Write-Host "                 V E R S I O N   C H E C K               " -ForegroundColor White
                     Write-Host "=========================================================" -ForegroundColor Red
-                    Write-Host "`n  [!] You already have the latest v1.2 version installed!" -ForegroundColor Yellow
-                    Write-Host "  [!] No files need to be downloaded or updated.`n" -ForegroundColor DarkGray
+                    Write-Host "`n [!] You already have the latest v1.2 version installed!" -ForegroundColor Yellow
+                    Write-Host " [!] No files need to be downloaded or updated.`n" -ForegroundColor DarkGray
                     
                     Read-Host "  Press the ENTER key to return to the menu"
                 } 
