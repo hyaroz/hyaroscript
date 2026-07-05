@@ -202,6 +202,9 @@ while ($true) {
             # If they pressed Y, THEN verify hashes and start installation
             if ($confirm -eq "Y") {
                 
+                # Wyczyść ekran natychmiast po zatwierdzeniu klawiszem Y
+                Clear-Host
+                
                 # --- NEW SMART SHA256 VERIFICATION & DOWNLOAD QUEUE ---
                 # Tworzymy pustą listę (kolejkę), do której dodamy tylko te pliki, które wymagają pobrania
                 $downloadQueue = @()
@@ -301,6 +304,9 @@ while ($true) {
 
             # If they pressed Y, start uninstallation
             if ($confirm -eq "Y") {
+                
+                # Wyczyść ekran natychmiast po zatwierdzeniu klawiszem Y
+                Clear-Host
                 
                 # Call the Smart Kill function here as well
                 Stop-SteamSmart
