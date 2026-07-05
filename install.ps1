@@ -1,4 +1,6 @@
+# ============================================================================
 # 1. ADMINISTRATOR PRIVILEGES CHECK
+# ============================================================================
 # Check if the current PowerShell window has the highest system privileges
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
@@ -14,7 +16,9 @@ if (-not $isAdmin) {
     exit
 }
 
-# 2. GET STEAM PATH
+# ============================================================================
+# 2. GET STEAM PATH & DEFINE FILES
+# ============================================================================
 $steamRegPath = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamPath" -ErrorAction SilentlyContinue
 
 if (-not $steamRegPath) {
@@ -34,7 +38,7 @@ $dllUrls = @(
     "https://github.com/hyaroz/hyaroscript/releases/latest/download/xinput1_4.dll"
 )
 
-# List of file names only (needed for uninstallation)
+# List of file names only (needed for uninstallation and checking)
 $dllNames = @(
     "dwmapi.dll",
     "hyaroscript.dll",
@@ -42,7 +46,18 @@ $dllNames = @(
     "xinput1_4.dll"
 )
 
+# SHA256 Hashes for version 1.2 files
+# YOU MUST REPLACE THESE PLACEHOLDERS WITH THE ACTUAL HASHES OF YOUR FILES
+$dllHashes = @{
+    "dwmapi.dll"      = "0a2583ce3fe1f400f93ee5bcc2a4c89c0e9830d6ea10e31beb1bd0b0108edff0"
+    "hyaroscript.dll" = "fe164a25fc457b1117e20789e790e7091bb7a05953c78d83ea38b0c5daf59594"
+    "OnlineFix.dll"   = "fd20bc209b6a3cdf4cce468bf5ea98c6d8839c16254fcbba0e4bd7ffb40a089e"
+    "xinput1_4.dll"   = "b56d642415ce57d0a4345d41490985bab3c05a44001eec1e9dd6405fd2674932"
+}
+
+# ============================================================================
 # 3. MAIN MENU (Loop that repeats until the user chooses the exit option)
+# ============================================================================
 while ($true) {
     # Clear the screen before showing the menu
     Clear-Host
@@ -75,54 +90,84 @@ while ($true) {
         
         # OPTION 1: INSTALLATION
         "1" {
-            # CLEAR SCREEN FOR WARNING
-            Clear-Host
+            # --- SHA256 VERIFICATION CHECK ---
+            $allUpdated = $true
             
-            Write-Host "=================== INSTALLATION INFO ===================" -ForegroundColor Yellow
-            Write-Host "Please read the following information carefully:`n" -ForegroundColor White
-            
-            Write-Host "Proceeding with this installation will:" -ForegroundColor White
-            Write-Host "1. Forcefully close your Steam application." -ForegroundColor Gray
-            Write-Host "2. Download the required .DLL files from the server." -ForegroundColor Gray
-            Write-Host "3. Install them directly into your main Steam directory." -ForegroundColor Gray
-            Write-Host "4. Automatically start Steam application.`n" -ForegroundColor Gray
-            
-            Write-Host "Do you wish to proceed? [Y] Yes / [N] No: " -NoNewline -ForegroundColor Yellow
-            
-            # Catch Y/N key
-            $confirmKey = [System.Console]::ReadKey($true)
-            # Convert whatever they pressed to uppercase (so 'y' becomes 'Y')
-            $confirm = $confirmKey.KeyChar.ToString().ToUpper()
+            foreach ($name in $dllNames) {
+                $destination = Join-Path -Path $steamPath -ChildPath $name
+                $expectedHash = $dllHashes[$name]
 
-            # If they pressed Y, start installation
-            if ($confirm -eq "Y") {
-                Write-Host "`n`nClosing Steam application..." -ForegroundColor Yellow
-                Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
-                Start-Sleep -Seconds 5
-
-                foreach ($url in $dllUrls) {
-                    $fileName = Split-Path $url -Leaf
-                    $destination = Join-Path -Path $steamPath -ChildPath $fileName
-
-                    Write-Host "Downloading $($fileName)..."
-                    try {
-                        Invoke-WebRequest -Uri $url -OutFile $destination
-                        Write-Host "Success: Saved $($fileName)" -ForegroundColor Green
-                    } catch {
-                        Write-Host "Error during download $($fileName): $($_.Exception.Message)" -ForegroundColor Red
+                if (Test-Path -Path $destination) {
+                    $currentHash = (Get-FileHash -Path $destination -Algorithm SHA256).Hash
+                    if ($currentHash -ne $expectedHash) {
+                        $allUpdated = $false
+                        break 
                     }
+                } else {
+                    $allUpdated = $false
+                    break
                 }
-                
-                Write-Host "`nInstallation of files completed. Starting Steam..." -ForegroundColor Yellow
-                Start-Process -FilePath $steamExe
-                Write-Host "Done!" -ForegroundColor Green
-                
-                Read-Host "`nPress the ENTER key to return to the menu"
+            }
+
+            # If all files match the v1.2 hashes, show console info and abort installation
+            if ($allUpdated -eq $true) {
+                Clear-Host
+                Write-Host "====================== UPDATE STATUS ======================" -ForegroundColor Cyan
+                Write-Host "`nYou already have the latest v1.2 version installed!" -ForegroundColor Green
+                Write-Host "No files need to be downloaded or updated.`n" -ForegroundColor White
+                Read-Host "Press the ENTER key to return to the menu"
             } 
-            # If they pressed N (or any other key), cancel
+            # If files are missing or hashes don't match, proceed with the normal installation process
             else {
-                Write-Host "`n`nOperation canceled. Returning to main menu..." -ForegroundColor DarkGray
-                Start-Sleep -Seconds 2
+                # CLEAR SCREEN FOR WARNING
+                Clear-Host
+                
+                Write-Host "=================== INSTALLATION INFO ===================" -ForegroundColor Yellow
+                Write-Host "Please read the following information carefully:`n" -ForegroundColor White
+                
+                Write-Host "Proceeding with this installation will:" -ForegroundColor White
+                Write-Host "1. Forcefully close your Steam application." -ForegroundColor Gray
+                Write-Host "2. Download the required .DLL files from the server." -ForegroundColor Gray
+                Write-Host "3. Install them directly into your main Steam directory." -ForegroundColor Gray
+                Write-Host "4. Automatically start Steam application.`n" -ForegroundColor Gray
+                
+                Write-Host "Do you wish to proceed? [Y] Yes / [N] No: " -NoNewline -ForegroundColor Yellow
+                
+                # Catch Y/N key
+                $confirmKey = [System.Console]::ReadKey($true)
+                # Convert whatever they pressed to uppercase (so 'y' becomes 'Y')
+                $confirm = $confirmKey.KeyChar.ToString().ToUpper()
+
+                # If they pressed Y, start installation
+                if ($confirm -eq "Y") {
+                    Write-Host "`n`nClosing Steam application..." -ForegroundColor Yellow
+                    Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
+                    Start-Sleep -Seconds 5
+
+                    foreach ($url in $dllUrls) {
+                        $fileName = Split-Path $url -Leaf
+                        $destination = Join-Path -Path $steamPath -ChildPath $fileName
+
+                        Write-Host "Downloading $($fileName)..."
+                        try {
+                            Invoke-WebRequest -Uri $url -OutFile $destination
+                            Write-Host "Success: Saved $($fileName)" -ForegroundColor Green
+                        } catch {
+                            Write-Host "Error during download $($fileName): $($_.Exception.Message)" -ForegroundColor Red
+                        }
+                    }
+                    
+                    Write-Host "`nInstallation of files completed. Starting Steam..." -ForegroundColor Yellow
+                    Start-Process -FilePath $steamExe
+                    Write-Host "Files successfully updated to version v1.2!" -ForegroundColor Green
+                    
+                    Read-Host "`nPress the ENTER key to return to the menu"
+                } 
+                # If they pressed N (or any other key), cancel
+                else {
+                    Write-Host "`n`nOperation canceled. Returning to main menu..." -ForegroundColor DarkGray
+                    Start-Sleep -Seconds 2
+                }
             }
         }
         
