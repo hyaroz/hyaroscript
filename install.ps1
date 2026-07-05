@@ -96,10 +96,10 @@ $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 
 # If the script detects it is NOT running as administrator ($isAdmin is false):
 if (-not $isAdmin) {
-    Write-Host "============================================================================" -ForegroundColor Red
-    Write-Host "        Administrator permissions are required to use this command.         " -ForegroundColor Red
-    Write-Host "     Please run PowerShell as Administrator and paste the command again.    " -ForegroundColor Yellow
-    Write-Host "============================================================================" -ForegroundColor Red
+    Write-Host "=============================================================================" -ForegroundColor Red
+    Write-Host "        Administrator permissions are required to use this command.          " -ForegroundColor Red
+    Write-Host "     Please run PowerShell as Administrator and paste the command again.     " -ForegroundColor Yellow
+    Write-Host "=============================================================================" -ForegroundColor Red
     
     # The script stops here and waits for the user to press ENTER
     Read-Host "Press the ENTER key to close this window"
