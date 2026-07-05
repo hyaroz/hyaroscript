@@ -69,12 +69,12 @@ function Download-WithProgress {
                     $formattedPercent = $percent.ToString().PadLeft(3)
                     
                     # `r returns carriage to the beginning of the line to overwrite text
-                    Write-Host "`r    Downloading... $formattedPercent% (File Size: $totalMB MB) " -NoNewline -ForegroundColor White
+                    Write-Host "`r      Downloading... $formattedPercent% (File Size: $totalMB MB) " -NoNewline -ForegroundColor White
                 }
             }
         } while ($bytesRead -gt 0)
         
-        Write-Host "`n    [+] Success: Saved $($FileName)`n" -ForegroundColor Green
+        Write-Host "`n  [+] Success: Saved $($FileName)`n" -ForegroundColor Green
     }
     catch {
         Write-Host "`n    [-] Error during download $($FileName): $($_.Exception.Message)`n" -ForegroundColor Red
@@ -97,8 +97,8 @@ $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 # If the script detects it is NOT running as administrator ($isAdmin is false):
 if (-not $isAdmin) {
     Write-Host "============================================================================" -ForegroundColor Red
-    Write-Host "         Administrator permissions are required to use this command.        " -ForegroundColor Red
-    Write-Host "      Please run PowerShell as Administrator and paste the command again.   " -ForegroundColor Yellow
+    Write-Host "        Administrator permissions are required to use this command.         " -ForegroundColor Red
+    Write-Host "     Please run PowerShell as Administrator and paste the command again.    " -ForegroundColor Yellow
     Write-Host "============================================================================" -ForegroundColor Red
     
     # The script stops here and waits for the user to press ENTER
