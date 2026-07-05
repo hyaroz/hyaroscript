@@ -1,4 +1,101 @@
 # ============================================================================
+# 0. SETUP AND FUNCTIONS (Smart Kill & ASCII Progress Bar)
+# ============================================================================
+# Enforce TLS 1.2 to ensure downloads from GitHub work on all Windows versions
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# FUNCTION 1: Intelligent Steam shutdown (Smart Kill)
+function Stop-SteamSmart {
+    Write-Host "`nChecking Steam process..." -ForegroundColor Yellow
+    $steamProcess = Get-Process -Name "steam" -ErrorAction SilentlyContinue
+    
+    if ($steamProcess) {
+        Write-Host "Closing Steam application..." -ForegroundColor Yellow
+        Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
+        
+        $timeout = 15
+        $timer = 0
+        
+        # Wait until Steam process completely disappears, max 15 seconds
+        while ((Get-Process -Name "steam" -ErrorAction SilentlyContinue) -and ($timer -lt $timeout)) {
+            Start-Sleep -Seconds 1
+            $timer++
+        }
+        
+        if ($timer -ge $timeout) {
+            Write-Host "Warning: Steam took too long to close, proceeding anyway..." -ForegroundColor DarkGray
+        }
+    } else {
+        Write-Host "Steam is not running. Proceeding instantly..." -ForegroundColor DarkGray
+    }
+    
+    # Small pause to release file locks in Windows
+    Start-Sleep -Seconds 1
+}
+
+# FUNCTION 2: File download with ASCII Progress Bar
+function Download-WithProgressBar {
+    param (
+        [string]$Url,
+        [string]$Destination,
+        [string]$FileName
+    )
+    
+    # Disable default PowerShell progress bar to avoid visual glitches
+    $ProgressPreference = 'SilentlyContinue'
+    
+    try {
+        $webRequest = [System.Net.WebRequest]::Create($Url)
+        $response = $webRequest.GetResponse()
+        $totalBytes = $response.ContentLength
+        $responseStream = $response.GetResponseStream()
+        
+        $targetStream = [System.IO.File]::Create($Destination)
+        
+        $buffer = New-Object byte[] 8192
+        $bytesRead = 0
+        $totalDownloaded = 0
+        
+        Write-Host "  Downloading..." -ForegroundColor White
+        
+        # Loop for reading stream chunks and drawing the bar
+        do {
+            $bytesRead = $responseStream.Read($buffer, 0, $buffer.Length)
+            if ($bytesRead -gt 0) {
+                $targetStream.Write($buffer, 0, $bytesRead)
+                $totalDownloaded += $bytesRead
+                
+                if ($totalBytes -gt 0) {
+                    $percent = [math]::Floor(($totalDownloaded / $totalBytes) * 100)
+                    
+                    # 20 blocks in total for the progress bar
+                    $filledBlocks = [math]::Floor($percent / 5) 
+                    $emptyBlocks = 20 - $filledBlocks
+                    
+                    $bar = ("█" * $filledBlocks) + ("░" * $emptyBlocks)
+                    $formattedPercent = $percent.ToString().PadLeft(3)
+                    
+                    # `r returns carriage to the beginning of the line to overwrite text
+                    Write-Host "`r  [$bar] $formattedPercent% " -NoNewline -ForegroundColor Cyan
+                }
+            }
+        } while ($bytesRead -gt 0)
+        
+        Write-Host "`n  Success: Saved $($FileName)" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "`n  Error during download $($FileName): $($_.Exception.Message)" -ForegroundColor Red
+    }
+    finally {
+        # Release files so they can be used
+        if ($targetStream) { $targetStream.Dispose() }
+        if ($responseStream) { $responseStream.Dispose() }
+        if ($response) { $response.Dispose() }
+    }
+}
+
+
+# ============================================================================
 # 1. ADMINISTRATOR PRIVILEGES CHECK
 # ============================================================================
 # Check if the current PowerShell window has the highest system privileges
@@ -105,33 +202,40 @@ while ($true) {
             
             # Catch Y/N key
             $confirmKey = [System.Console]::ReadKey($true)
-            # Convert whatever they pressed to uppercase (so 'y' becomes 'Y')
             $confirm = $confirmKey.KeyChar.ToString().ToUpper()
 
             # If they pressed Y, THEN verify hashes and start installation
             if ($confirm -eq "Y") {
                 
-                # --- SHA256 VERIFICATION CHECK ---
-                $allUpdated = $true
+                # --- NEW SMART SHA256 VERIFICATION & DOWNLOAD QUEUE ---
+                # Tworzymy pustą listę (kolejkę), do której dodamy tylko te pliki, które wymagają pobrania
+                $downloadQueue = @()
                 
-                foreach ($name in $dllNames) {
+                # Skanujemy każdy z 4 linków
+                foreach ($url in $dllUrls) {
+                    # Wyciągamy samą nazwę pliku z linku (np. "dwmapi.dll")
+                    $name = Split-Path $url -Leaf
                     $destination = Join-Path -Path $steamPath -ChildPath $name
                     $expectedHash = $dllHashes[$name]
 
-                    if (Test-Path -Path $destination) {
+                    # Warunek 1: Sprawdzamy, czy pliku w ogóle brakuje
+                    if (-not (Test-Path -Path $destination)) {
+                        # Dodajemy plik do kolejki pobierania z przypisanym powodem: "Missing"
+                        $downloadQueue += [PSCustomObject]@{ Name = $name; Url = $url; Reason = "Missing" }
+                    } 
+                    # Warunek 2: Jeśli plik istnieje, sprawdzamy jego hash
+                    else {
                         $currentHash = (Get-FileHash -Path $destination -Algorithm SHA256).Hash
+                        # Jeśli hash się nie zgadza...
                         if ($currentHash -ne $expectedHash) {
-                            $allUpdated = $false
-                            break 
+                            # Dodajemy plik do kolejki pobierania z przypisanym powodem: "Mismatch"
+                            $downloadQueue += [PSCustomObject]@{ Name = $name; Url = $url; Reason = "Mismatch" }
                         }
-                    } else {
-                        $allUpdated = $false
-                        break
                     }
                 }
 
-                # If all files match the v1.2 hashes, show styled console info and abort
-                if ($allUpdated -eq $true) {
+                # Jeśli kolejka pobierania jest całkowicie pusta (count = 0), oznacza to, że wszystkie 4 pliki były w wersji 1.2
+                if ($downloadQueue.Count -eq 0) {
                     Clear-Host
                     Write-Host "=========================================================" -ForegroundColor Red
                     Write-Host "                 V E R S I O N   C H E C K               " -ForegroundColor White
@@ -141,26 +245,31 @@ while ($true) {
                     
                     Read-Host " Press the ENTER key to return to the menu"
                 } 
-                # If files are missing or hashes don't match, proceed with install
+                # Jeśli jednak jakikolwiek plik wymaga pobrania (kolejka > 0)
                 else {
-                    Write-Host "`n`nClosing Steam application..." -ForegroundColor Yellow
-                    Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
-                    Start-Sleep -Seconds 5
+                    # Wywołanie funkcji zamykającej Steama
+                    Stop-SteamSmart
 
-                    foreach ($url in $dllUrls) {
-                        $fileName = Split-Path $url -Leaf
-                        $destination = Join-Path -Path $steamPath -ChildPath $fileName
-
-                        Write-Host "Downloading $($fileName)..."
-                        try {
-                            Invoke-WebRequest -Uri $url -OutFile $destination
-                            Write-Host "Success: Saved $($fileName)" -ForegroundColor Green
-                        } catch {
-                            Write-Host "Error during download $($fileName): $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "`n================== SYNCHRONIZING FILES ==================" -ForegroundColor Cyan
+                    
+                    # Pobieramy TYLKO te pliki, które znalazły się na liście kolejkowej
+                    foreach ($item in $downloadQueue) {
+                        
+                        # Sprawdzamy powód dodania do listy i drukujemy dedykowaną wiadomość przed paskiem pobierania
+                        if ($item.Reason -eq "Missing") {
+                            Write-Host "`n[!] Missing file detected: $($item.Name)" -ForegroundColor Yellow
+                        } 
+                        elseif ($item.Reason -eq "Mismatch") {
+                            Write-Host "`n[!] Version mismatch detected for file: $($item.Name)" -ForegroundColor Yellow
                         }
+                        
+                        $destination = Join-Path -Path $steamPath -ChildPath $item.Name
+
+                        # Wywołanie funkcji pobierającej z animowanym paskiem
+                        Download-WithProgressBar -Url $item.Url -Destination $destination -FileName $item.Name
                     }
                     
-                    Write-Host "`nInstallation of files completed. Starting Steam..." -ForegroundColor Yellow
+                    Write-Host "`nInstallation of required files completed. Starting Steam..." -ForegroundColor Yellow
                     Start-Process -FilePath $steamExe
                     Write-Host "Files successfully updated to version v1.2!" -ForegroundColor Green
                     
@@ -197,9 +306,9 @@ while ($true) {
 
             # If they pressed Y, start uninstallation
             if ($confirm -eq "Y") {
-                Write-Host "`n`nClosing Steam application..." -ForegroundColor Yellow
-                Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
-                Start-Sleep -Seconds 5
+                
+                # Call the Smart Kill function here as well
+                Stop-SteamSmart
 
                 foreach ($name in $dllNames) {
                     $destination = Join-Path -Path $steamPath -ChildPath $name
