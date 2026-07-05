@@ -181,8 +181,8 @@ while ($true) {
         "1" {
             Clear-Host
             
-            Write-Host "=================== INSTALLATION INFO ===================" -ForegroundColor Yellow
-            Write-Host "Please read the following information carefully:`n" -ForegroundColor White
+            Write-Host " =================== INSTALLATION INFO ===================" -ForegroundColor Yellow
+            Write-Host "    Please read the following information carefully:`n" -ForegroundColor White
             
             Write-Host "Proceeding with this installation will:" -ForegroundColor White
             Write-Host "1. Forcefully close your Steam application." -ForegroundColor Gray
@@ -219,9 +219,9 @@ while ($true) {
 
                 if ($downloadQueue.Count -eq 0) {
                     Clear-Host
-                    Write-Host "=========================================================" -ForegroundColor Red
-                    Write-Host "                 V E R S I O N   C H E C K               " -ForegroundColor White
-                    Write-Host "=========================================================" -ForegroundColor Red
+                    Write-Host " =========================================================" -ForegroundColor Red
+                    Write-Host "                  V E R S I O N   C H E C K               " -ForegroundColor White
+                    Write-Host " =========================================================" -ForegroundColor Red
                     Write-Host "`n  [!] You already have the latest v1.2 version installed!" -ForegroundColor Yellow
                     Write-Host "  [*] No files need to be downloaded or updated.`n" -ForegroundColor DarkGray
                     
@@ -229,9 +229,9 @@ while ($true) {
                 } 
                 else {
                     # Wyrysowanie pięknej ramki ZANIM cokolwiek zacznie się pobierać lub wyłączać
-                    Write-Host "=========================================================" -ForegroundColor Red
-                    Write-Host "          S Y N C H R O N I Z I N G   F I L E S          " -ForegroundColor White
-                    Write-Host "=========================================================" -ForegroundColor Red
+                    Write-Host " =========================================================" -ForegroundColor Red
+                    Write-Host "           S Y N C H R O N I Z I N G   F I L E S          " -ForegroundColor White
+                    Write-Host " =========================================================" -ForegroundColor Red
                     Write-Host ""
 
                     # Funkcja zamykania odpala się teraz pod ramką
@@ -239,10 +239,10 @@ while ($true) {
 
                     foreach ($item in $downloadQueue) {
                         if ($item.Reason -eq "Missing") {
-                            Write-Host "  [!] Missing file detected: $($item.Name)" -ForegroundColor Yellow
+                            Write-Host "  [!] Missing File Detected: $($item.Name)" -ForegroundColor Yellow
                         } 
                         elseif ($item.Reason -eq "Mismatch") {
-                            Write-Host "  [!] Version mismatch detected: $($item.Name)" -ForegroundColor Yellow
+                            Write-Host "  [!] Old Version Detected: $($item.Name)" -ForegroundColor Yellow
                         }
                         
                         $destination = Join-Path -Path $steamPath -ChildPath $item.Name
@@ -268,8 +268,8 @@ while ($true) {
         "2" {
             Clear-Host
             
-            Write-Host "======================== UNINSTALLATION WARNING =========================" -ForegroundColor Yellow
-            Write-Host "Please read the following information carefully:`n" -ForegroundColor White
+            Write-Host " ======================== UNINSTALLATION WARNING =========================" -ForegroundColor Yellow
+            Write-Host " Please read the following information carefully:`n" -ForegroundColor White
             
             Write-Host "Proceeding with this uninstallation will:" -ForegroundColor White
             Write-Host "1. Forcefully close your Steam application." -ForegroundColor Gray
@@ -288,9 +288,9 @@ while ($true) {
                 Clear-Host
                 
                 # Ramka dla deinstalacji (dla spójności)
-                Write-Host "=========================================================" -ForegroundColor Red
+                Write-Host " =========================================================" -ForegroundColor Red
                 Write-Host "             U N I N S T A L L I N G   F I L E S         " -ForegroundColor White
-                Write-Host "=========================================================" -ForegroundColor Red
+                Write-Host " =========================================================" -ForegroundColor Red
                 Write-Host ""
                 
                 Stop-SteamSmart
