@@ -13,15 +13,16 @@ function Stop-SteamSmart {
         Write-Host "  [*] Closing Steam application..." -ForegroundColor DarkGray
         Stop-Process -Name "steam" -Force -ErrorAction SilentlyContinue
         
-        $timeout = 15$timer = 0
+        $timeout = 15
+        $timer = 0
         
         # Wait until Steam process completely disappears, max 15 seconds
-        while ((Get-Process -Name "steam" -ErrorAction SilentlyContinue) -and ($timer -lt$timeout)) {
+        while ((Get-Process -Name "steam" -ErrorAction SilentlyContinue) -and ($timer -lt $timeout)) {
             Start-Sleep -Seconds 1
             $timer++
         }
         
-        if ($timer -ge$timeout) {
+        if ($timer -ge $timeout) {
             Write-Host "  [!] Warning: Steam took too long to close, proceeding anyway..." -ForegroundColor Yellow
         }
     }
@@ -41,24 +42,34 @@ function Download-WithProgress {
     # Disable default PowerShell progress bar to avoid visual glitches
     $ProgressPreference = 'SilentlyContinue'
     
+    $webRequest = $null
+    $response = $null
+    $responseStream = $null
+    $targetStream = $null
+    
     try {
         $webRequest = [System.Net.WebRequest]::Create($Url)
-        $response =$webRequest.GetResponse()
-        $totalBytes =$response.ContentLength
-        $responseStream = $response.GetResponseStream()$targetStream = [System.IO.File]::Create($Destination)$buffer = New-Object byte[] 8192
-        $bytesRead = 0$totalDownloaded = 0
+        $response = $webRequest.GetResponse()
+        $totalBytes = $response.ContentLength
+        $responseStream = $response.GetResponseStream()
+        $targetStream = [System.IO.File]::Create($Destination)
+        $buffer = New-Object byte[] 8192
+        $bytesRead = 0
+        $totalDownloaded = 0
         
         # Calculate file size in Megabytes and round to 2 decimal places
         $totalMB = [math]::Round($totalBytes / 1MB, 2)
         
         # Loop for reading stream chunks and drawing the text
         do {
-            $bytesRead =$responseStream.Read($buffer, 0,$buffer.Length)
-            if ($bytesRead -gt 0) {$targetStream.Write($buffer, 0,$bytesRead)
-                $totalDownloaded +=$bytesRead
+            $bytesRead = $responseStream.Read($buffer, 0, $buffer.Length)
+            if ($bytesRead -gt 0) {
+                $targetStream.Write($buffer, 0, $bytesRead)
+                $totalDownloaded += $bytesRead
                 
-                if ($totalBytes -gt 0) {$percent = [math]::Floor(($totalDownloaded / $totalBytes) * 100)
-                    $formattedPercent =$percent.ToString().PadLeft(3)
+                if ($totalBytes -gt 0) {
+                    $percent = [math]::Floor(($totalDownloaded / $totalBytes) * 100)
+                    $formattedPercent = $percent.ToString().PadLeft(3)
                     
                     # `r returns carriage to the beginning of the line to overwrite text
                     Write-Host "`r      Downloading... $formattedPercent% (File Size: $totalMB MB) " -NoNewline -ForegroundColor White
@@ -295,7 +306,7 @@ while ($true) {
             Write-Host "Are you sure you want to completely remove these files? [Y] Yes / [N] No: " -NoNewline -ForegroundColor Yellow
             
             $confirmKey = [System.Console]::ReadKey($true)
-            $confirm =$confirmKey.KeyChar.ToString().ToUpper()
+            $confirm = $confirmKey.KeyChar.ToString().ToUpper()
 
             if ($confirm -eq "Y") {
                 Clear-Host
@@ -307,7 +318,8 @@ while ($true) {
                 
                 Stop-SteamSmart
 
-                foreach ($name in $dllNames) {$destination = Join-Path -Path $steamPath -ChildPath$name
+                foreach ($name in $dllNames) {
+                    $destination = Join-Path -Path $steamPath -ChildPath $name
                     
                     if (Test-Path $destination) {
                         Remove-Item -Path $destination -Force
