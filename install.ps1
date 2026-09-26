@@ -266,7 +266,7 @@ while ($true) {
     Write-Host "  Found Steam folder: $steamPath" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  [1] Download and install Stable .DLL files (v1.2)" -ForegroundColor White
-    Write-Host "  [2] Download and install Beta .DLL files (v1.3)" -ForegroundColor Yellow
+    Write-Host "  [2] Download and install Beta .DLL files (v1.3)" -ForegroundColor White
     Write-Host "  [3] Uninstall .DLL files from the Steam folder" -ForegroundColor White
     Write-Host "  [4] Exit" -ForegroundColor White
     Write-Host ""
