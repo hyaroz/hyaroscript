@@ -236,9 +236,9 @@ $dllHashesV12 = @{
 # Poniżej możesz zmienić linki, jeśli pliki wersji beta są pod innym adresem
 $dllUrlsV13Beta = @(
     "https://github.com/hyaroz/hyaroscript/releases/download/v1.3_Beta/dwmapi.dll",
-    "https://github.com/hyaroz/hyaroscript/releases/download/v1.3_beta/hyaroscript.dll",
-    "https://github.com/hyaroz/hyaroscript/releases/download/v1.3_beta/OnlineFix.dll",
-    "https://github.com/hyaroz/hyaroscript/releases/download/v1.3_beta/xinput1_4.dll"
+    "https://github.com/hyaroz/hyaroscript/releases/download/v1.3_Beta/hyaroscript.dll",
+    "https://github.com/hyaroz/hyaroscript/releases/download/v1.3_Beta/OnlineFix.dll",
+    "https://github.com/hyaroz/hyaroscript/releases/download/v1.3_Beta/xinput1_4.dll"
 )
 
 # Podmień poniższe wartości SHA256 na swoje docelowe sumy kontrolne dla v1.3:
